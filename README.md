@@ -7,7 +7,7 @@
 
 ## 1. データのロードと前処理
 
-### データの読み込み
+### 1-1. データの読み込み
 - `train.csv`と`test.csv`データセットをロードし、それぞれ`train_data`と`test_data`に格納します。
 - トレーニングデータとテストデータを結合し、前処理を一括で行うために`all_df`として扱います。
 
@@ -16,8 +16,8 @@ train_data = pd.read_csv("/kaggle/input/titanic/train.csv")
 test_data = pd.read_csv("/kaggle/input/titanic/test.csv")
 all_df = pd.concat([train_data, test_data], sort=False).reset_index(drop=True)
 ```
-
-### 欠損値の処理
+### 汎用的なデータ前処理
+#### 欠損値の処理
 - `Fare`列の欠損値を、`Pclass`（客室クラス）別の平均値で補完します。
 
 ```python
@@ -27,19 +27,7 @@ all_df = pd.merge(all_df, Fare_mean, on="Pclass", how="left")
 all_df.loc[all_df["Fare"].isnull(), "Fare"] = all_df["Fare_mean"]
 all_df = all_df.drop("Fare_mean", axis=1)
 ```
-
-### 新しい特徴量の作成
-- `Name`列を分割して`honorific`（敬称）を抽出し、年齢分布の分析に使用します。
-- 家族の有無を示す`alone`列を作成します。
-
-```python
-name_df = all_df["Name"].str.split("[,.]", expand=True, n=2)
-name_df = name_df.rename(columns={0: "family_name", 1: "honorific", 2: "name"})
-all_df = pd.concat([all_df, name_df], axis=1)
-all_df["alone"] = (all_df["SibSp"] + all_df["Parch"] == 0).astype(int)
-```
-
-### カテゴリ変数のエンコーディング
+#### カテゴリ変数のエンコーディング
 - `Sex`、`Embarked`、`Pclass`、`honorific`、`alone`のカテゴリ変数をラベルエンコーディングします。
 
 ```python
@@ -51,6 +39,17 @@ for cat in categories:
     if all_df[cat].dtypes == "object":
         le = LabelEncoder()
         all_df[cat] = le.fit_transform(all_df[cat])
+```
+### タイタニックデータに特有の前処理
+#### 新しい特徴量の作成
+- `Name`列を分割して`honorific`（敬称）を抽出し、年齢分布の分析に使用します。
+- 家族の有無を示す`alone`列を作成します。
+
+```python
+name_df = all_df["Name"].str.split("[,.]", expand=True, n=2)
+name_df = name_df.rename(columns={0: "family_name", 1: "honorific", 2: "name"})
+all_df = pd.concat([all_df, name_df], axis=1)
+all_df["alone"] = (all_df["SibSp"] + all_df["Parch"] == 0).astype(int)
 ```
 
 ### データの分割
