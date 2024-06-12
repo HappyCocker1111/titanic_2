@@ -124,3 +124,14 @@ FileLink('./submission.csv')
 ## 4. 結果
 
 このプロジェクトの最終的なモデルのスコアは、0.75598 でした。
+
+## 5. まとめ
+### データの前処理
+1. 欠損値の処理：Fare列の欠損値をPclass別の平均値で補完
+2. カテゴリ変数のエンコーディング：Sex、Embarked、Pclass、honorific、aloneをラベルエンコーディング
+3. 新しい特徴量の作成：Name列からhonorific、family_name、nameを抽出し、alone列を作成
+### モデルのトレーニング
+1. LightGBMモデルをトレーニング
+2. 特徴量の選択とコーディング
+3. ハイパーパラメータのチューニング：objective、random_seed
+4. 早期停止とログ評価のコールバックを使用
