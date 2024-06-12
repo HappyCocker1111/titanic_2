@@ -16,8 +16,8 @@ train_data = pd.read_csv("/kaggle/input/titanic/train.csv")
 test_data = pd.read_csv("/kaggle/input/titanic/test.csv")
 all_df = pd.concat([train_data, test_data], sort=False).reset_index(drop=True)
 ```
-### 汎用的なデータ前処理
-#### 欠損値の処理
+### 1-2. 汎用的なデータ前処理
+#### 1-2-1. 欠損値の処理
 - `Fare`列の欠損値を、`Pclass`（客室クラス）別の平均値で補完します。
 
 ```python
@@ -27,7 +27,7 @@ all_df = pd.merge(all_df, Fare_mean, on="Pclass", how="left")
 all_df.loc[all_df["Fare"].isnull(), "Fare"] = all_df["Fare_mean"]
 all_df = all_df.drop("Fare_mean", axis=1)
 ```
-#### カテゴリ変数のエンコーディング
+#### 1-2-2. カテゴリ変数のエンコーディング
 - `Sex`、`Embarked`、`Pclass`、`honorific`、`alone`のカテゴリ変数をラベルエンコーディングします。
 
 ```python
@@ -40,8 +40,8 @@ for cat in categories:
         le = LabelEncoder()
         all_df[cat] = le.fit_transform(all_df[cat])
 ```
-### タイタニックデータに特有の前処理
-#### 新しい特徴量の作成
+### 1-3. タイタニックデータに特有の前処理
+#### 1-3-1. 新しい特徴量の作成
 - `Name`列を分割して`honorific`（敬称）を抽出し、年齢分布の分析に使用します。
 - 家族の有無を示す`alone`列を作成します。
 
@@ -52,7 +52,7 @@ all_df = pd.concat([all_df, name_df], axis=1)
 all_df["alone"] = (all_df["SibSp"] + all_df["Parch"] == 0).astype(int)
 ```
 
-### データの分割
+### 1-4. データの分割
 - トレーニングデータとテストデータを再度分割します。
 
 ```python
@@ -63,10 +63,10 @@ test_X = all_df[all_df["Survived"].isnull()].drop("Survived", axis=1).reset_inde
 
 ## 2. 特徴量の選択とモデルのトレーニング
 
-### 特徴量の選択とコーディング
+### 2-1. 特徴量の選択とコーディング
 - 上記の前処理ステップで、モデルに適した特徴量を選択し、必要なエンコーディングを行います。
 
-### モデルのトレーニング
+### 2-2. モデルのトレーニング
 - LightGBMモデルを使用してトレーニングと評価を行います。
 
 ```python
@@ -97,14 +97,14 @@ model_lgb = lgb.train(
 
 ## 3. 予測と提出ファイルの作成
 
-### 予測
+### 3-1. 予測
 - テストデータセットに対して予測を行います。
 
 ```python
 y_pred = model_lgb.predict(test_X, num_iteration=model_lgb.best_iteration)
 ```
 
-### 提出ファイルの作成
+### 3-2. 提出ファイルの作成
 - 予測結果を`submission.csv`というファイルに保存します。
 
 ```python
@@ -112,7 +112,7 @@ output = pd.DataFrame({'PassengerId': test_data.PassengerId, 'Survived': np.roun
 output.to_csv('submission.csv', index=False)
 ```
 
-### 提出ファイルのダウンロードリンク
+### 3-3. 提出ファイルのダウンロードリンク
 - `submission.csv`ファイルをダウンロードするためのリンクを提供します。
 
 ```python
